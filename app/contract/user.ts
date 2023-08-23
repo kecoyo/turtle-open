@@ -24,13 +24,18 @@ export const loginUser = {
   token: { type: 'string', description: 'token' },
 };
 
-// loginUser
-export const loginUserRequest = {
+// login
+export const userLoginRequest = {
   username: { type: 'string', required: true, example: 'admin' },
   password: { type: 'string', required: true, example: '123456' },
 };
+export const userLoginResponse = {
+  ...baseResponse,
+  data: { type: 'loginUser', description: '登录用户信息' },
+};
 
-export const loginUserResponse = {
+// getLoginUser
+export const getLoginUserResponse = {
   ...baseResponse,
   data: { type: 'loginUser', description: '登录用户信息' },
 };

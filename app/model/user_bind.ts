@@ -51,8 +51,8 @@ export default function (app: Application) {
     'UserBind',
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      appId: DataTypes.STRING,
-      userId: DataTypes.STRING,
+      appId: DataTypes.INTEGER,
+      userId: DataTypes.INTEGER,
       openid: DataTypes.STRING,
       unionid: DataTypes.STRING,
       createdAt: DataTypes.DATE,

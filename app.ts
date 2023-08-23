@@ -22,6 +22,20 @@ export default class AppBoot implements IBoot {
     // await this.app.model.sync();
     // await this.app.model.sync({ alter: true });
     // await this.app.model.sync({ force: true });
+
+    this.app.validator.addRule('jsonString', (rule, value) => {
+      try {
+        JSON.parse(value);
+      } catch (err) {
+        return 'must be json string';
+      }
+    });
+
+    this.app.validator.addRule('file', (rule, value) => {
+      if (!value.filepath) {
+        return 'must be file';
+      }
+    });
   }
 
   async willReady() {

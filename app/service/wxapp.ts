@@ -49,7 +49,7 @@ export default class WxappService extends Service {
     }
 
     // 生成Token令牌
-    let token = await app.jwtSign({ id: user.id });
+    let token = await app.jwt.sign({ id: user.id });
     return {
       ..._.pick(user.dataValues, ['id', 'name', 'avatar', 'phone', 'gender', 'birthday', 'email', 'remark']),
       token,

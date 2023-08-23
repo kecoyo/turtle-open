@@ -25,7 +25,7 @@ export default class UserService extends Service {
     }
 
     // 生成Token令牌
-    let token = await app.jwtSign({ id: user.id });
+    let token = await app.jwt.sign({ id: user.id });
     return {
       ..._.omit(user.dataValues, ['password']),
       token,
