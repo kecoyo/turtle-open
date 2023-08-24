@@ -5,35 +5,36 @@ import { Controller } from 'egg';
  */
 export default class UploadController extends Controller {
   /**
-   * @summary 文件上传检查
+   * @summary 检查上传文件的状态
    * @description
-   * @router POST /upload/state
+   * @router POST /upload/queryFile
    * @apikey
-   * @request body uploadStateRequest *body
-   * @response 200 uploadStateResponse 上传文件，返回文件信息
+   * @request body queryFileRequest *body
+   * @response 200 queryFileResponse 上传文件，返回文件信息
    */
-  async state() {
+  async queryFile() {
     const { ctx, service } = this;
 
-    ctx.validate(ctx.rule.uploadStateRequest);
+    ctx.validate(ctx.rule.queryFileRequest);
 
-    const { appId, subId, hash } = ctx.request.body;
-    const data = await service.upload.state(appId, subId, hash);
+    const { appId, hash } = ctx.request.body;
+    const data = await service.upload.getFileInfo(appId, hash);
     ctx.success(data);
   }
 
   /**
-   * @summary 上传文件
+   * @summary FormData方式上传文件
    * @description
    * @router POST /upload/uploadFile
    * @apikey
    * @request formData integer *appId
-   * @request formData string *subId
+   * @request formData string *tags
    * @request formData file *file
    * @response 200 uploadFileResponse 上传文件，返回文件信息
    */
   async uploadFile() {
     const { ctx, service } = this;
+    const { user } = ctx.state;
 
     const body = {
       ...ctx.request.body,
@@ -42,9 +43,27 @@ export default class UploadController extends Controller {
 
     ctx.validate(ctx.rule.uploadFileRequest, body);
 
-    const { appId, subId, file } = body;
+    const { appId, tags, file } = body;
+    const data = await service.upload.uploadFile({ appId, tags, file }, user.id);
+    ctx.success(data);
+  }
+
+  /**
+   * @summary 大文件分片上传，支持断点续传
+   * @description
+   * @router POST /upload/uploadChunk
+   * @apikey
+   * @request body uploadChunkRequest *body
+   * @response 200 uploadChunkResponse 上传文件，返回文件信息
+   */
+  async uploadChunk() {
+    const { ctx, service } = this;
     const { user } = ctx.state;
-    const data = await service.upload.uploadFile({ appId, subId, file, userId: user.id });
+
+    ctx.validate(ctx.rule.uploadChunkRequest);
+
+    const payload = ctx.request.body;
+    const data = await service.upload.uploadChunk(payload, user.id);
     ctx.success(data);
   }
 }

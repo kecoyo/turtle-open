@@ -18,9 +18,9 @@ import {
   Model,
   NonAttribute,
 } from 'sequelize';
-import { UserBindModel } from './user_bind';
+import { DataUserBindModel } from './data_user_bind';
 
-export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
+export class DataUserModel extends Model<InferAttributes<DataUserModel>, InferCreationAttributes<DataUserModel>> {
   declare id: CreationOptional<number>;
   declare username: CreationOptional<string>;
   declare password: CreationOptional<string>;
@@ -31,33 +31,33 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   declare birthday: CreationOptional<string>;
   declare email: CreationOptional<string>;
   declare remark: CreationOptional<string>;
-  declare createdAt: CreationOptional<Date>;
-  declare updatedAt: CreationOptional<Date>;
+  declare createAt: CreationOptional<Date>;
+  declare updateAt: CreationOptional<Date>;
   declare status: CreationOptional<number>;
   declare deletedAt: CreationOptional<Date>;
 
   // Since TS cannot determine model association at compile time
   // we have to declare them here purely virtually
-  declare getUserBinds: HasManyGetAssociationsMixin<UserBindModel>;
-  declare addUserBind: HasManyAddAssociationMixin<UserBindModel, number>;
-  declare addUserBinds: HasManyAddAssociationsMixin<UserBindModel, number>;
-  declare setUserBinds: HasManySetAssociationsMixin<UserBindModel, number>;
-  declare removeUserBind: HasManyRemoveAssociationMixin<UserBindModel, number>;
-  declare removeUserBinds: HasManyRemoveAssociationsMixin<UserBindModel, number>;
-  declare hasUserBind: HasManyHasAssociationMixin<UserBindModel, number>;
-  declare hasUserBinds: HasManyHasAssociationsMixin<UserBindModel, number>;
+  declare getUserBinds: HasManyGetAssociationsMixin<DataUserBindModel>;
+  declare addUserBind: HasManyAddAssociationMixin<DataUserBindModel, number>;
+  declare addUserBinds: HasManyAddAssociationsMixin<DataUserBindModel, number>;
+  declare setUserBinds: HasManySetAssociationsMixin<DataUserBindModel, number>;
+  declare removeUserBind: HasManyRemoveAssociationMixin<DataUserBindModel, number>;
+  declare removeUserBinds: HasManyRemoveAssociationsMixin<DataUserBindModel, number>;
+  declare hasUserBind: HasManyHasAssociationMixin<DataUserBindModel, number>;
+  declare hasUserBinds: HasManyHasAssociationsMixin<DataUserBindModel, number>;
   declare countUserBinds: HasManyCountAssociationsMixin;
-  declare createUserBind: HasManyCreateAssociationMixin<UserBindModel, 'userId'>;
+  declare createUserBind: HasManyCreateAssociationMixin<DataUserBindModel, 'userId'>;
 
-  declare userBinds?: NonAttribute<UserBindModel[]>;
+  declare userBinds?: NonAttribute<DataUserBindModel[]>;
 
   declare static associations: {
-    userBinds: Association<UserModel, UserBindModel>;
+    userBinds: Association<DataUserModel, DataUserBindModel>;
   };
 }
 
 export default function (app: Application) {
-  const UserModel = app.model.define<UserModel>(
+  const DataUserModel = app.model.define<DataUserModel>(
     'User',
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -70,21 +70,21 @@ export default function (app: Application) {
       birthday: DataTypes.DATE,
       email: DataTypes.STRING,
       remark: DataTypes.STRING,
-      createdAt: DataTypes.DATE,
-      updatedAt: DataTypes.DATE,
+      createAt: DataTypes.DATE,
+      updateAt: DataTypes.DATE,
       status: DataTypes.INTEGER,
       deletedAt: DataTypes.DATE,
     },
     {
-      tableName: 'turtle_user',
+      tableName: 'data_user',
     },
   );
 
   app.logger.info('model User loaded');
 
-  return class User extends UserModel {
+  return class DataUser extends DataUserModel {
     static async associate() {
-      app.model.User.hasMany(app.model.UserBind, { as: 'userBinds', foreignKey: 'userId' });
+      app.model.DataUser.hasMany(app.model.DataUserBind, { as: 'userBinds', foreignKey: 'userId' });
     }
   };
 }

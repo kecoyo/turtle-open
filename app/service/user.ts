@@ -8,11 +8,10 @@ export default class UserService extends Service {
    * @param password 密码
    * @returns
    */
-  async login(username, password) {
+  async login(username: string, password: string) {
     const { ctx, app } = this;
 
-    const user = await ctx.model.User.findOne({
-      attributes: { exclude: ['status', 'deletedAt'] },
+    const user = await ctx.model.DataUser.findOne({
       where: { username },
     });
     if (!user) {

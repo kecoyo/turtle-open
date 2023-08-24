@@ -8,7 +8,7 @@ export default (appInfo: EggAppInfo) => {
 
   // 上传配置
   config.upload = {
-    basePath: 'https://cdn.kecoyo.com/',
+    baseUrl: 'https://cdn.kecoyo.com/',
   };
 
   return config;

@@ -20,7 +20,7 @@
   },
   "prettier": "@kecoyo/prettier-config",
   "dependencies": {
-    "@kecoyo/egg-framework": "^1.0.0"
+    "@kecoyo/egg-framework": "1.0.1"
   },
   "devDependencies": {
     "@eggjs/tsconfig": "^1.3.3",

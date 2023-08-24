@@ -4,10 +4,9 @@ import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, 
 export class SystemFileModel extends Model<InferAttributes<SystemFileModel>, InferCreationAttributes<SystemFileModel>> {
   declare id: CreationOptional<number>;
   declare appId: number;
-  declare subId: string;
   declare type: string;
   declare hash: string;
-  declare tags: CreationOptional<string>;
+  declare tags: string;
   declare name: string;
   declare xext: string;
   declare xurl: string;
@@ -19,6 +18,8 @@ export class SystemFileModel extends Model<InferAttributes<SystemFileModel>, Inf
   declare isfast: CreationOptional<number>;
   declare issafe: CreationOptional<number>;
   declare status: number;
+  declare createAt: CreationOptional<Date>;
+  declare updateAt: CreationOptional<Date>;
 }
 
 export default function (app: Application) {
@@ -27,7 +28,6 @@ export default function (app: Application) {
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       appId: DataTypes.INTEGER,
-      subId: DataTypes.STRING,
       type: DataTypes.STRING,
       hash: DataTypes.STRING,
       tags: DataTypes.STRING,
@@ -42,13 +42,11 @@ export default function (app: Application) {
       isfast: DataTypes.INTEGER,
       issafe: DataTypes.INTEGER,
       status: DataTypes.INTEGER,
+      createAt: DataTypes.DATE,
+      updateAt: DataTypes.DATE,
     },
     {
       tableName: 'system_file',
-      createdAt: 'create_at',
-      updatedAt: 'update_at',
-      deletedAt: false,
-      paranoid: false, // 启用软删除
     },
   );
 
@@ -56,7 +54,7 @@ export default function (app: Application) {
 
   return class SystemFile extends SystemFileModel {
     static async associate() {
-      // app.model.SystemFile.hasMany(app.model.UserBind, { as: 'userBinds', foreignKey: 'userId' });
+      // app.model.SystemFile.hasMany(app.model.DataUserBind, { as: 'userBinds', foreignKey: 'userId' });
     }
   };
 }

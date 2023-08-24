@@ -32,8 +32,8 @@ export default class UserController extends Controller {
     const { ctx, service } = this;
 
     const { user } = ctx.state;
-    const loginUser = await ctx.model.User.findByPk(user.id, {
-      attributes: ['id', 'username', 'password', 'name', 'avatar', 'phone', 'gender', 'birthday', 'email', 'remark'],
+    const loginUser = await ctx.model.DataUser.findByPk(user.id, {
+      attributes: ['id', 'username', 'name', 'avatar', 'phone', 'gender', 'birthday', 'email', 'remark'],
     });
     ctx.success(loginUser);
   }
