@@ -2,8 +2,8 @@
   "extends": "@eggjs/tsconfig",
   "compilerOptions": {
     "declaration": false,
-    "skipLibCheck": false,
-    "skipDefaultLibCheck": false,
+    // "skipLibCheck": false,
+    // "skipDefaultLibCheck": false,
     "noUnusedLocals": false, // 定义未使用的变量报错
     "noUnusedParameters": false // 定义未使用的参数报错
   },

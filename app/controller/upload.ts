@@ -18,12 +18,12 @@ export default class UploadController extends Controller {
     ctx.validate(ctx.rule.queryFileRequest);
 
     const { appId, hash } = ctx.request.body;
-    const data = await service.upload.getFileInfo(appId, hash);
+    const data = await service.upload.queryFile(appId, hash);
     ctx.success(data);
   }
 
   /**
-   * @summary FormData方式上传文件
+   * @summary 表单方式上传文件
    * @description
    * @router POST /upload/uploadFile
    * @apikey
@@ -51,19 +51,19 @@ export default class UploadController extends Controller {
   /**
    * @summary 大文件分片上传，支持断点续传
    * @description
-   * @router POST /upload/uploadChunk
+   * @router POST /upload/uploadFileChunk
    * @apikey
-   * @request body uploadChunkRequest *body
-   * @response 200 uploadChunkResponse 上传文件，返回文件信息
+   * @request body uploadFileChunkRequest *body
+   * @response 200 uploadFileChunkResponse 上传文件，返回文件信息
    */
-  async uploadChunk() {
+  async uploadFileChunk() {
     const { ctx, service } = this;
     const { user } = ctx.state;
 
-    ctx.validate(ctx.rule.uploadChunkRequest);
+    ctx.validate(ctx.rule.uploadFileChunkRequest);
 
     const payload = ctx.request.body;
-    const data = await service.upload.uploadChunk(payload, user.id);
+    const data = await service.upload.uploadFileChunk(payload, user.id);
     ctx.success(data);
   }
 }

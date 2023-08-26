@@ -2,13 +2,25 @@ import { Service } from 'egg';
 import fs from 'fs-extra';
 import path from 'path';
 
+interface FileChunk {
+  appId: number;
+  tags: string;
+  hash: string;
+  name: string;
+  size: number;
+  mime: string;
+  start: number;
+  length: number;
+  content: string;
+}
+
 export default class UploadService extends Service {
   /**
    * 上传文件到upload目录，及上传到七牛对象存储服务器
    * @param {number} appId 应用ID
    * @param {string} hash 文件hash
    */
-  async getFileInfo(appId: number, hash: string) {
+  async queryFile(appId: number, hash: string) {
     const { ctx, app, config } = this;
 
     // 检查应用信息
@@ -27,7 +39,7 @@ export default class UploadService extends Service {
       throw ctx.createError(1, '文件不完整，需要继续上传', buffer.length); // 最后上传的位置
     }
 
-    return { key: fileInfo.xkey, url: fileInfo.xurl };
+    return { url: fileInfo.xkey };
   }
 
   /**
@@ -55,11 +67,8 @@ export default class UploadService extends Service {
     });
     if (fileInfo) {
       // 文件已经上传过，直接返回
-      return { key: fileInfo.xkey, url: fileInfo.xurl };
+      return { url: fileInfo.xkey };
     }
-
-    // 上传七牛文件存储
-    this.uploadFileToQiniu(key, file.filepath);
 
     // 创建文件记录
     fileInfo = await ctx.model.SystemFile.create({
@@ -75,19 +84,23 @@ export default class UploadService extends Service {
       size: stat.size,
       uuid: 0,
       unid: userId,
-      status: 2,
+      status: 1,
     });
 
-    return { key: fileInfo.xkey, url: fileInfo.xurl };
+    // 完成文件上传
+    await this.completeFileUpload(key, file.filepath, fileInfo.id);
+
+    // 返回文件URL
+    return { url: fileInfo.xkey };
   }
 
   /**
    * 上传文件到upload目录，及上传到七牛对象存储服务器
-   * @param {object} payload
+   * @param {FileChunk} fileChunk
    */
-  async uploadChunk(payload: { appId: number; tags: string; hash: string; name: string; size: number; mime: string; content: string }, userId: number) {
+  async uploadFileChunk(fileChunk: FileChunk, userId: number) {
     const { ctx, config, app } = this;
-    const { appId, tags, hash, name, size, mime, content } = payload;
+    const { appId, tags, hash, name, size, mime, start, length, content } = fileChunk;
 
     // 获取应用配置, 不存在会抛出异常
     await ctx.service.app.getAppInfo(appId, true);
@@ -97,9 +110,9 @@ export default class UploadService extends Service {
       where: { appId, hash },
     });
     if (fileInfo) {
+      // 文件已经上传完成，直接返回
       if (fileInfo.status === 2) {
-        // 文件已经上传完成，直接返回
-        return { key: fileInfo.xkey, url: fileInfo.xurl };
+        return { url: fileInfo.xkey };
       }
 
       // fileInfo.status === 1，文件未完成，正在上传中
@@ -107,19 +120,13 @@ export default class UploadService extends Service {
       const filePath = path.join(config.baseDir, 'app/public', fileInfo.xkey);
       const buffer0 = fs.readFileSync(filePath);
       const buffer1 = Buffer.from(content, 'base64');
-      // const totalLength = buffer0.length + buffer1.length;
-      const buffer = Buffer.concat([buffer0, buffer1]);
-      fs.writeFileSync(filePath, buffer);
-
-      // 上传成功
-      if (buffer.length >= fileInfo.size) {
-        // 完成文件上传
-        this.completeUploadChunk(fileInfo.xkey, filePath, fileInfo.id);
-        // 返回文件URL
-        return { key: fileInfo.xkey, url: fileInfo.xurl };
+      // 简单文件的校验
+      if (buffer0.length !== start || buffer1.length !== length) {
+        await this.cleanAndThrowError(fileInfo.xkey, filePath, fileInfo.id);
       }
+      const buffer = Buffer.concat([buffer0, buffer1]);
 
-      throw ctx.createError(1, '继续上传', buffer.length);
+      return await this.writeAndCheckFileUpload(filePath, buffer, fileInfo);
     }
 
     // 新文件，没有上传过
@@ -147,21 +154,33 @@ export default class UploadService extends Service {
     const filePath = path.join(config.baseDir, 'app/public', key);
     fs.ensureDirSync(path.dirname(filePath)); // 确保目录存在，否则为报错
     const buffer = Buffer.from(content, 'base64');
+
+    return await this.writeAndCheckFileUpload(filePath, buffer, fileInfo);
+  }
+
+  // 写入文件，并检查上传进度
+  private async writeAndCheckFileUpload(filePath, buffer, fileInfo) {
+    const { ctx } = this;
+
+    // 写入文件
     fs.writeFileSync(filePath, buffer);
 
-    // 小文件，上传成功
-    if (buffer.length >= fileInfo.size) {
+    if (buffer.length === fileInfo.size) {
       // 完成文件上传
-      this.completeUploadChunk(key, filePath, fileInfo.id);
+      await this.completeFileUpload(fileInfo.xkey, filePath, fileInfo.id);
       // 返回文件URL
-      return { key: fileInfo.xkey, url: fileInfo.xurl };
+      return { url: fileInfo.xkey };
+    } else if (buffer.length < fileInfo.size) {
+      // 未上传完成，继续上传
+      throw ctx.createError(1, '继续上传', buffer.length);
+    } else {
+      // 大小有问题，重新上传
+      await this.cleanAndThrowError(fileInfo.xkey, filePath, fileInfo.id);
     }
-
-    throw ctx.createError(1, '继续上传', buffer.length);
   }
 
   // 完成文件上传
-  private async completeUploadChunk(key: string, filePath: string, fileId: number) {
+  private async completeFileUpload(key: string, filePath: string, fileId: number) {
     const { ctx } = this;
     // 上传到七牛存储服务器
     await this.uploadFileToQiniu(key, filePath);
@@ -182,6 +201,8 @@ export default class UploadService extends Service {
 
   // 删除临时文件，同时向上递归删除空的目录
   private async deleteTempFile(filePath: string) {
+    if (!fs.existsSync(filePath)) return;
+
     // 删除文件
     fs.removeSync(filePath);
     // 获取父目录
@@ -191,5 +212,22 @@ export default class UploadService extends Service {
     if (files.length === 0) {
       this.deleteTempFile(dirname);
     }
+  }
+
+  // 删除临时文件，同时向上递归删除空的目录
+  private async cleanAndThrowError(key, filePath, fileId) {
+    const { ctx, app } = this;
+
+    // 删除七牛存储对象
+    await app.qiniu.delete(key);
+
+    // 删除数据库文件记录
+    await ctx.model.SystemFile.destroy({ where: { id: fileId } });
+
+    // 删除临时文件
+    await this.deleteTempFile(filePath);
+
+    // 抛出错误
+    throw ctx.createError(2, '上传失败，请重新上传');
   }
 }

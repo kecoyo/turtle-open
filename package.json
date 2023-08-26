@@ -1,5 +1,5 @@
 {
-  "name": "egg-server",
+  "name": "turtle-open",
   "version": "1.0.0",
   "private": true,
   "description": "egg simple project.",
@@ -12,8 +12,9 @@
     "debug": "egg-bin debug",
     "dev": "egg-bin dev",
     "lint": "eslint .",
-    "start": "egg-scripts start --daemon --title=egg-server",
-    "stop": "egg-scripts stop --title=egg-server",
+    "start": "egg-scripts start --port 7010 --title=turtle-open",
+    "start-daemon": "egg-scripts start --daemon --title=turtle-open",
+    "stop": "egg-scripts stop --title=turtle-open",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",
     "tsc": "ets && tsc -p tsconfig.json"
