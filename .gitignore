@@ -14,10 +14,11 @@ run/
 typings/
 .nyc_output/
 
-.htaccess
-app.js
-app/**/*.js
-
 .tem/
 config/config.local.ts
 config/config.prod.ts
+
+.htaccess
+app.js
+app/**/*.js
+config/*.js
