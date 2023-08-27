@@ -30,6 +30,9 @@ export class DataUserModel extends Model<InferAttributes<DataUserModel>, InferCr
   declare gender: CreationOptional<string>;
   declare birthday: CreationOptional<string>;
   declare email: CreationOptional<string>;
+  declare province: CreationOptional<number>;
+  declare city: CreationOptional<number>;
+  declare county: CreationOptional<number>;
   declare remark: CreationOptional<string>;
   declare createAt: CreationOptional<Date>;
   declare updateAt: CreationOptional<Date>;
@@ -69,6 +72,9 @@ export default function (app: Application) {
       gender: DataTypes.INTEGER,
       birthday: DataTypes.DATE,
       email: DataTypes.STRING,
+      province: DataTypes.INTEGER,
+      city: DataTypes.INTEGER,
+      county: DataTypes.INTEGER,
       remark: DataTypes.STRING,
       createAt: DataTypes.DATE,
       updateAt: DataTypes.DATE,
@@ -77,6 +83,13 @@ export default function (app: Application) {
     },
     {
       tableName: 'data_user',
+      createdAt: 'createAt',
+      updatedAt: 'updateAt',
+      scopes: {
+        userInfo: {
+          attributes: { exclude: ['username', 'password', 'status', 'createAt', 'updateAt', 'deleted', 'deletedAt'] },
+        },
+      },
     },
   );
 

@@ -39,3 +39,16 @@ export const getLoginUserResponse = {
   ...baseResponse,
   data: { type: 'loginUser', description: '登录用户信息' },
 };
+
+// updateBaseInfo
+export const updateBaseInfoRequest = {
+  name: { type: 'string', required: false, description: '姓名' },
+  avatar: { type: 'string', required: false, description: '头像' },
+  gender: { type: 'number', required: false, description: '性别' },
+  birthday: { type: 'string', required: false, description: '生日' },
+  email: { type: 'string', required: false, description: '邮箱' },
+  province: { type: 'number', required: false, description: '省' },
+  city: { type: 'number', required: false, description: '市' },
+  county: { type: 'number', required: false, description: '区县' },
+  remark: { type: 'string', required: false, description: '备注' },
+};

@@ -23,6 +23,8 @@ export default function (app: Application) {
     },
     {
       tableName: 'system_app',
+      createdAt: 'createAt',
+      updatedAt: 'updateAt',
     },
   );
 

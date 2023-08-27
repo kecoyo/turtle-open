@@ -1,5 +1,4 @@
 import { Service } from 'egg';
-import _ from 'lodash';
 
 export default class UserService extends Service {
   /**
@@ -11,7 +10,8 @@ export default class UserService extends Service {
   async login(username: string, password: string) {
     const { ctx, app } = this;
 
-    const user = await ctx.model.DataUser.findOne({
+    let user = await ctx.model.DataUser.findOne({
+      attributes: ['id', 'password'],
       where: { username },
     });
     if (!user) {
@@ -23,10 +23,13 @@ export default class UserService extends Service {
       throw ctx.createError(2, '用户名或密码错误');
     }
 
+    // 重新加载更多信息
+    user = await ctx.model.DataUser.scope('userInfo').findByPk(user.id);
+
     // 生成Token令牌
-    let token = await app.jwt.sign({ id: user.id });
+    let token = await app.jwt.sign({ id: user?.id });
     return {
-      ..._.omit(user.dataValues, ['password']),
+      ...user?.dataValues,
       token,
     };
   }

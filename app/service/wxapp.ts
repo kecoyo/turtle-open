@@ -1,5 +1,4 @@
 import { Service } from 'egg';
-import _ from 'lodash';
 
 // 微信相关接口常量
 const jscode2sessionUri = 'https://api.weixin.qq.com/sns/jscode2session'; // 微信临时授权码
@@ -29,8 +28,8 @@ export default class WxappService extends Service {
 
     // 通过openid获取用户信息
     const { openid, session_key } = res.data;
+    let userBind = await ctx.model.DataUserBind.findOne({ where: { appId, openid } });
     let user;
-    let userBind = await ctx.model.DataUserBind.findOne({ where: { appId, openid }, include: 'user' });
     if (!userBind) {
       // 没有绑定，则创建新用户
       user = await ctx.model.DataUser.create({
@@ -41,14 +40,14 @@ export default class WxappService extends Service {
         openid,
         userId: user.id,
       });
-    } else {
-      user = userBind.user;
     }
+
+    user = await ctx.model.DataUser.scope('userInfo').findByPk(userBind.userId);
 
     // 生成Token令牌
     let token = await app.jwt.sign({ id: user.id });
     return {
-      ..._.pick(user.dataValues, ['id', 'name', 'avatar', 'phone', 'gender', 'birthday', 'email', 'remark']),
+      ...user.dataValues,
       token,
     };
   }

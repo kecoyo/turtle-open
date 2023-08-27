@@ -47,6 +47,8 @@ export default function (app: Application) {
     },
     {
       tableName: 'system_file',
+      createdAt: 'createAt',
+      updatedAt: 'updateAt',
     },
   );
 

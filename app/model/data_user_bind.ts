@@ -58,6 +58,8 @@ export default function (app: Application) {
     },
     {
       tableName: 'data_user_bind',
+      createdAt: 'createAt',
+      updatedAt: 'updateAt',
     },
   );
 

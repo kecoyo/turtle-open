@@ -34,7 +34,7 @@ export default class UploadService extends Service {
       throw ctx.createError(1, '文件不存在', 0);
     } else if (fileInfo.status === 1) {
       const key = fileInfo.xkey;
-      const file = path.join(config.baseDir, 'app/public', key);
+      const file = path.join(config.static.dir, key);
       const buffer = fs.readFileSync(file);
       throw ctx.createError(1, '文件不完整，需要继续上传', buffer.length); // 最后上传的位置
     }
@@ -117,7 +117,7 @@ export default class UploadService extends Service {
 
       // fileInfo.status === 1，文件未完成，正在上传中
       // 合并前面上传文件
-      const filePath = path.join(config.baseDir, 'app/public', fileInfo.xkey);
+      const filePath = path.join(config.static.dir, fileInfo.xkey);
       const buffer0 = fs.readFileSync(filePath);
       const buffer1 = Buffer.from(content, 'base64');
       // 简单文件的校验
@@ -151,7 +151,7 @@ export default class UploadService extends Service {
       status: 1,
     });
 
-    const filePath = path.join(config.baseDir, 'app/public', key);
+    const filePath = path.join(config.static.dir, key);
     fs.ensureDirSync(path.dirname(filePath)); // 确保目录存在，否则为报错
     const buffer = Buffer.from(content, 'base64');
 
