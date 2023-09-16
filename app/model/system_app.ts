@@ -6,8 +6,11 @@ export class SystemAppModel extends Model<InferAttributes<SystemAppModel>, Infer
   declare name: string;
   declare wechatAppId: string;
   declare wechatAppSecret: string;
+  declare remark: string;
   declare createAt: CreationOptional<Date>;
   declare updateAt: CreationOptional<Date>;
+  declare status: CreationOptional<number>;
+  declare deleted: CreationOptional<number>;
 }
 
 export default function (app: Application) {
@@ -18,21 +21,23 @@ export default function (app: Application) {
       name: DataTypes.STRING,
       wechatAppId: DataTypes.STRING,
       wechatAppSecret: DataTypes.STRING,
+      remark: DataTypes.STRING,
       createAt: DataTypes.DATE,
       updateAt: DataTypes.DATE,
+      status: DataTypes.TINYINT,
+      deleted: DataTypes.TINYINT,
     },
     {
       tableName: 'system_app',
       createdAt: 'createAt',
       updatedAt: 'updateAt',
+      defaultScope: {
+        where: { deleted: 0, status: 1 },
+      },
     },
   );
 
   app.logger.info('model SystemApp loaded');
 
-  return class SystemApp extends SystemAppModel {
-    static async associate() {
-      app.model.SystemApp.hasMany(app.model.DataUserBind, { as: 'userBinds', foreignKey: 'userId' });
-    }
-  };
+  return class SystemApp extends SystemAppModel {};
 }

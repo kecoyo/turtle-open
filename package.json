@@ -21,7 +21,7 @@
   },
   "prettier": "@kecoyo/prettier-config",
   "dependencies": {
-    "@kecoyo/egg-framework": "^1.0.2",
+    "@kecoyo/egg-framework": "^1.0.3",
     "fs-extra": "^11.1.1"
   },
   "devDependencies": {

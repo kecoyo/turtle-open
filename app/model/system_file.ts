@@ -54,9 +54,5 @@ export default function (app: Application) {
 
   app.logger.info('model SystemFile loaded');
 
-  return class SystemFile extends SystemFileModel {
-    static async associate() {
-      // app.model.SystemFile.hasMany(app.model.DataUserBind, { as: 'userBinds', foreignKey: 'userId' });
-    }
-  };
+  return class SystemFile extends SystemFileModel {};
 }

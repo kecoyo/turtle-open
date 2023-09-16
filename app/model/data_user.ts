@@ -1,24 +1,5 @@
 import { Application } from 'egg';
-import {
-  Association,
-  CreationOptional,
-  DataTypes,
-  HasManyAddAssociationMixin,
-  HasManyAddAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  HasManyGetAssociationsMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManySetAssociationsMixin,
-  InferAttributes,
-  InferCreationAttributes,
-  Model,
-  NonAttribute,
-} from 'sequelize';
-import { DataUserBindModel } from './data_user_bind';
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
 
 export class DataUserModel extends Model<InferAttributes<DataUserModel>, InferCreationAttributes<DataUserModel>> {
   declare id: CreationOptional<number>;
@@ -37,31 +18,12 @@ export class DataUserModel extends Model<InferAttributes<DataUserModel>, InferCr
   declare createAt: CreationOptional<Date>;
   declare updateAt: CreationOptional<Date>;
   declare status: CreationOptional<number>;
-  declare deletedAt: CreationOptional<Date>;
-
-  // Since TS cannot determine model association at compile time
-  // we have to declare them here purely virtually
-  declare getUserBinds: HasManyGetAssociationsMixin<DataUserBindModel>;
-  declare addUserBind: HasManyAddAssociationMixin<DataUserBindModel, number>;
-  declare addUserBinds: HasManyAddAssociationsMixin<DataUserBindModel, number>;
-  declare setUserBinds: HasManySetAssociationsMixin<DataUserBindModel, number>;
-  declare removeUserBind: HasManyRemoveAssociationMixin<DataUserBindModel, number>;
-  declare removeUserBinds: HasManyRemoveAssociationsMixin<DataUserBindModel, number>;
-  declare hasUserBind: HasManyHasAssociationMixin<DataUserBindModel, number>;
-  declare hasUserBinds: HasManyHasAssociationsMixin<DataUserBindModel, number>;
-  declare countUserBinds: HasManyCountAssociationsMixin;
-  declare createUserBind: HasManyCreateAssociationMixin<DataUserBindModel, 'userId'>;
-
-  declare userBinds?: NonAttribute<DataUserBindModel[]>;
-
-  declare static associations: {
-    userBinds: Association<DataUserModel, DataUserBindModel>;
-  };
+  declare deleted: CreationOptional<number>;
 }
 
 export default function (app: Application) {
   const DataUserModel = app.model.define<DataUserModel>(
-    'User',
+    'DataUser',
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       username: DataTypes.STRING,
@@ -78,26 +40,25 @@ export default function (app: Application) {
       remark: DataTypes.STRING,
       createAt: DataTypes.DATE,
       updateAt: DataTypes.DATE,
-      status: DataTypes.INTEGER,
-      deletedAt: DataTypes.DATE,
+      status: DataTypes.TINYINT,
+      deleted: DataTypes.TINYINT,
     },
     {
       tableName: 'data_user',
       createdAt: 'createAt',
       updatedAt: 'updateAt',
+      defaultScope: {
+        where: { deleted: 0, status: 1 },
+      },
       scopes: {
         userInfo: {
-          attributes: { exclude: ['username', 'password', 'status', 'createAt', 'updateAt', 'deleted', 'deletedAt'] },
+          attributes: { exclude: ['username', 'password', 'createAt', 'updateAt', 'status', 'deleted'] },
         },
       },
     },
   );
 
-  app.logger.info('model User loaded');
+  app.logger.info('model DataUser loaded');
 
-  return class DataUser extends DataUserModel {
-    static async associate() {
-      app.model.DataUser.hasMany(app.model.DataUserBind, { as: 'userBinds', foreignKey: 'userId' });
-    }
-  };
+  return class DataUser extends DataUserModel {};
 }
