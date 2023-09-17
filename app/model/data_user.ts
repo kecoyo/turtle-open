@@ -8,8 +8,8 @@ export class DataUserModel extends Model<InferAttributes<DataUserModel>, InferCr
   declare name: string;
   declare avatar: CreationOptional<string>;
   declare phone: CreationOptional<string>;
-  declare gender: CreationOptional<string>;
-  declare birthday: CreationOptional<string>;
+  declare gender: CreationOptional<number>;
+  declare birthday: CreationOptional<Date>;
   declare email: CreationOptional<string>;
   declare province: CreationOptional<number>;
   declare city: CreationOptional<number>;
@@ -31,7 +31,7 @@ export default function (app: Application) {
       name: DataTypes.STRING,
       avatar: DataTypes.STRING,
       phone: DataTypes.STRING,
-      gender: DataTypes.INTEGER,
+      gender: DataTypes.TINYINT,
       birthday: DataTypes.DATE,
       email: DataTypes.STRING,
       province: DataTypes.INTEGER,
